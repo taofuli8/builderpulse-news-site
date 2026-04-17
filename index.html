@@ -43,28 +43,23 @@
 <body>
   <main>
     <h1>BuilderPulse 每日新闻整理</h1>
-    <p class="meta">生成时间（Asia/Shanghai）: 2026-04-17 15:56:13</p>
-    被要求将输入的BuilderPulse Daily新闻整理成HTML片段。需要包含一个<section>，包含标题、日期、3-8条要点列表、1段结论。内容来自输入文本，非常长。需要提取关键新闻要点（今日top 3或其他重要新闻）作为要点列表，然后写一段结论。注意保持简洁、可读。直接输出HTML片段，无markdown代码块，无多余解释。
-
-标题可以用"BuilderPulse Daily"或者根据内容自拟。日期是April 17, 2026。要点列表应该包含今天最重要的3-8条新闻。从输入中提取：Top 3部分已经有明确的三个要点。另外还可以加入Discovery中的一些发现，但不要太多。选择最核心的3-8条即可。结论段总结趋势或给出行动建议。
-
-我将这样组织：标题"BuilderPulse Daily — April 17, 2026"，日期可以用<time>。要点列表包含：1. Anthropic Opus 4.7 vs Alibaba Qwen3.6；2. Hermes Agent突破；3. 两起隐私泄露事件；4. 开发者抱怨Opus 4.7的安全限制和计费问题；5. Cal.com闭源及开源争论；6. 本地模型趋势。但最好控制在3-8条，6条合理。结论：强调本地模型崛起、代理工具市场分裂、以及开发者对成本和隐私的关注。
-
-注意：不要输出任何解释或markdown。直接输出HTML。 class="builderpulse-daily">
+    <p class="meta">生成时间（Asia/Shanghai）: 2026-04-17 15:56:54</p>
+    直接输出HTML片段，满足用户要求：section包含标题、日期、3-8条要点列表、1段结论。内容从输入中提取关键点。html
+<section class="builderpulse-daily">
   <h2>BuilderPulse Daily</h2>
   <time datetime="2026-04-17">April 17, 2026</time>
-  
   <ul>
-    <li><strong>Anthropic ships Opus 4.7</strong> with adaptive thinking and a tokenizer expansion (1.0–1.35× more tokens). Same day, Alibaba open-sources <strong>Qwen3.6-35B-A3B</strong> (3B active MoE) – Simon Willison declares it draws a better pelican on his laptop than Opus 4.7.</li>
-    <li><strong>“Hermes Agent” breakout</strong>: NousResearch/hermes-agent hits 51K GitHub stars in 7 days; “hermes agent github” search surges +140%. The agent harness market gets a powerful new entrant.</li>
-    <li><strong>Two privacy meltdowns</strong>: Google hands student protester’s account data to ICE; Fiverr leaves customer tax returns and NDAs indexable on Google Search. Privacy-first tooling gets an expensive demo.</li>
-    <li><strong>Opus 4.7 backlash</strong>: Developers report the model refuses legitimate security work due to new cyber safeguards, and the tokenizer change acts as a silent price hike. Firebase user sees €54K billing spike from an unrestricted Gemini key.</li>
-    <li><strong>Cal.com goes closed source</strong>, citing AI copycat pressure – sparks rebuttal “Open Source Isn’t Dead.” Meanwhile, <strong>local-first stack</strong> (Qwen3.6 + Gemma 4 + VoxCPM2) becomes viable on a 48GB Mac, and Darkbloom enables private inference on idle Macs.</li>
-    <li><strong>Trend vocabulary shift</strong>: “Agent,” “harness,” “skills,” “memory” replace “copilot” and “pair programmer.” Self-hosted tools like OpenOffice (+250% search) and Joplin (+150%) see revival due to subscription fatigue.</li>
+    <li><strong>Opus 4.7 vs. Qwen3.6:</strong> Anthropic shipped Claude Opus 4.7 with adaptive thinking and price hikes, while Alibaba open-sourced Qwen3.6-35B-A3B (3B active) — Simon Willison declared the free local model draws a better pelican.</li>
+    <li><strong>Hermes Agent explodes:</strong> NousResearch's open-source agent harness hit 51K stars in 7 days, with search terms "hermes agent github" up +140% — incumbents are feeling the heat.</li>
+    <li><strong>Privacy meltdowns:</strong> Google handed student protester data to ICE, and Fiverr left tax returns indexable on Google — a hard, expensive demo for privacy-first dev tooling.</li>
+    <li><strong>Cal.com goes closed source:</strong> Cites AI copycat pressure, triggering a rebuttal ("Open Source Isn't Dead") and a migration wave for self-hosted booking tools.</li>
+    <li><strong>€54k billing spike:</strong> Firebase + Gemini key without restrictions — a clear product opportunity for API spend caps and runaway-key detection.</li>
+    <li><strong>Trend shift:</strong> "Agent" replaces "copilot" in vocabulary. Memory, harness, skills, and self-hosted are the winning keywords.</li>
+    <li><strong>Top 2-hour build:</strong> KeyFuse / TokenGuard — a browser extension enforcing per-project spend caps on Anthropic/OpenAI/Gemini keys, validated by the Firebase disaster thread (380 HN points).</li>
   </ul>
-  
-  <p><strong>Conclusion:</strong> The frontier model gap is closing fast – free, local MoEs now beat flagship APIs on specific tasks. Agent harnesses and cost-control tooling are the weekend-build opportunities with immediate demand. Build guardrails before the next €54K billing disaster, and price per agent, not per seat.</p>
+  <p><strong>Conclusion:</strong> The agent harness market is fracturing weekly — naming your product now buys a ~10-day SEO moat. Local-first MoE models (Qwen3.6 + Gemma 4) are catching up to frontier APIs. Ship guardrails before the next €54k thread, not after. Real 2026 founder revenue looks like $2K MRR over 8 months — price to the median, not the viral thread.</p>
 </section>
+```
     <hr />
     <p class="meta">
       数据源:
