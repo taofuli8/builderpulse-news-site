@@ -151,21 +151,25 @@ def write_state_map(state_file_path: Path, state_map: dict[str, str]) -> None:
     state_file_path.write_text(serialized_state + "\n", encoding="utf-8")  # 写入状态文件
 
 
-def build_archive_index_map(repo_dir: Path) -> dict[str, list[str]]:
-    """扫描仓库中的历史 HTML 文件，生成按年份分组的日期列表。"""
-    archive_map: dict[str, list[str]] = {}  # 年份 -> 日期列表 的映射
-    daily_file_pattern = re.compile(r"^(?P<year>\d{4})/(?P<date>\d{4}-\d{2}-\d{2})\.html$")  # 识别 yyyy/yyyy-mm-dd.html
+def build_archive_index_map(repo_dir: Path) -> dict[str, dict[str, list[str]]]:
+    """扫描仓库中的历史 HTML 文件，生成按年月分组的日期列表。"""
+    archive_map: dict[str, dict[str, list[str]]] = {}  # 年份 -> 月份 -> 日期列表 的映射
+    daily_file_pattern = re.compile(
+        r"^(?P<year>\d{4})/(?P<month>\d{2})/(?P<date>\d{4}-\d{2}-\d{2})\.html$"
+    )  # 识别 yyyy/mm/yyyy-mm-dd.html
     for html_path in repo_dir.rglob("*.html"):  # 遍历仓库所有 html 文件
         relative_path_text = html_path.relative_to(repo_dir).as_posix()  # 转成相对路径字符串
         matched = daily_file_pattern.match(relative_path_text)  # 判断是否日报文件
         if matched is None:  # 非日报文件直接跳过
             continue
         year_text = matched.group("year")  # 提取年份目录
+        month_text = matched.group("month")  # 提取月份目录
         date_text = matched.group("date")  # 提取日期文件名
-        archive_map.setdefault(year_text, []).append(date_text)  # 累加入对应年份列表
+        archive_map.setdefault(year_text, {}).setdefault(month_text, []).append(date_text)  # 累加入年月分组列表
 
-    for year_text in archive_map:  # 对每年日期按新到旧排序
-        archive_map[year_text] = sorted(archive_map[year_text], reverse=True)
+    for year_text in archive_map:  # 对每年每月日期按新到旧排序
+        for month_text in archive_map[year_text]:
+            archive_map[year_text][month_text] = sorted(archive_map[year_text][month_text], reverse=True)
     return archive_map  # 返回整理后的归档映射
 
 
@@ -174,6 +178,7 @@ def build_daily_html(
     generated_time_text: str,
     source_web_url: str,
     current_year_text: str,
+    current_month_text: str,
     archive_dates: list[str],
 ) -> str:
     """拼装单日页面 HTML（含历史切换导航）。"""
@@ -257,11 +262,11 @@ def build_daily_html(
       </p>
     </section>
     <aside class="panel">
-      <h3>{escape(current_year_text)} 历史日报</h3>
+      <h3>{escape(current_year_text)}-{escape(current_month_text)} 历史日报</h3>
       <ul>
         {history_links_html}
       </ul>
-      <p class="meta"><a href="../index.html">返回首页归档</a></p>
+      <p class="meta"><a href="../../index.html">返回首页归档</a></p>
     </aside>
   </main>
 </body>
@@ -270,18 +275,24 @@ def build_daily_html(
     return daily_html  # 返回单日 HTML 文本
 
 
-def build_root_index_html(archive_index_map: dict[str, list[str]]) -> str:
+def build_root_index_html(archive_index_map: dict[str, dict[str, list[str]]]) -> str:
     """生成根目录首页归档 HTML。"""
     year_sections_html_list: list[str] = []  # 每个年份区块 HTML 列表
     for year_text in sorted(archive_index_map.keys(), reverse=True):  # 从新到旧遍历年份
-        date_links_html = "\n".join(
-            [
-                f'<li><a href="{escape(year_text)}/{escape(date_text)}.html">{escape(date_text)}</a></li>'
-                for date_text in archive_index_map[year_text]
-            ]
-        )  # 年份内日报链接列表
+        month_sections_html_list: list[str] = []  # 年份内月份区块列表
+        for month_text in sorted(archive_index_map[year_text].keys(), reverse=True):  # 从新到旧遍历月份
+            date_links_html = "\n".join(
+                [
+                    f'<li><a href="{escape(year_text)}/{escape(month_text)}/{escape(date_text)}.html">{escape(date_text)}</a></li>'
+                    for date_text in archive_index_map[year_text][month_text]
+                ]
+            )  # 月份内日报链接列表
+            month_sections_html_list.append(
+                f"<details><summary>{escape(year_text)}-{escape(month_text)}</summary><ul>{date_links_html}</ul></details>"
+            )  # 追加月份折叠区块
+        merged_month_sections_html = "\n".join(month_sections_html_list)  # 合并该年月份区块
         year_sections_html_list.append(
-            f"<section><h2>{escape(year_text)}</h2><ul>{date_links_html}</ul></section>"
+            f"<section><h2>{escape(year_text)}</h2>{merged_month_sections_html}</section>"
         )  # 追加年份区块
 
     merged_year_sections_html = "\n".join(year_sections_html_list)  # 合并所有年份区块
@@ -425,6 +436,7 @@ def main() -> None:
     now_time = dt.datetime.now(dt.timezone(dt.timedelta(hours=8)))  # 生成东八区时间
     source_date_text = now_time.strftime("%Y-%m-%d")  # 生成当天日期文本
     source_year_text = source_date_text[:4]  # 生成当天年份目录文本
+    source_month_text = source_date_text[5:7]  # 生成当天月份目录文本
     state_file_path = working_dir / DEFAULT_STATE_FILE  # 状态文件完整路径
     try:
         latest_news_markdown = fetch_daily_markdown_file(
@@ -452,22 +464,25 @@ def main() -> None:
 
     generated_time_text = now_time.strftime("%Y-%m-%d %H:%M:%S")  # 格式化时间字符串
     source_web_url = build_source_web_url(source_lang=source_lang, date_text=source_date_text)  # 构造源文件网页地址
-    year_dir_path = working_dir / source_year_text  # 年份目录路径
-    year_dir_path.mkdir(parents=True, exist_ok=True)  # 若年份目录不存在则创建
-    daily_html_path = year_dir_path / f"{source_date_text}.html"  # 当天页面输出路径
+    month_dir_path = working_dir / source_year_text / source_month_text  # 年月目录路径
+    month_dir_path.mkdir(parents=True, exist_ok=True)  # 若年月目录不存在则创建
+    daily_html_path = month_dir_path / f"{source_date_text}.html"  # 当天页面输出路径
 
     archive_index_map = build_archive_index_map(working_dir)  # 扫描已有历史归档
-    archive_index_map.setdefault(source_year_text, [])  # 确保当前年份存在
-    if source_date_text not in archive_index_map[source_year_text]:  # 确保当日日期存在
-        archive_index_map[source_year_text].append(source_date_text)
-    archive_index_map[source_year_text] = sorted(archive_index_map[source_year_text], reverse=True)  # 日期新到旧排序
+    archive_index_map.setdefault(source_year_text, {}).setdefault(source_month_text, [])  # 确保当前年月存在
+    if source_date_text not in archive_index_map[source_year_text][source_month_text]:  # 确保当日日期存在
+        archive_index_map[source_year_text][source_month_text].append(source_date_text)
+    archive_index_map[source_year_text][source_month_text] = sorted(
+        archive_index_map[source_year_text][source_month_text], reverse=True
+    )  # 当月日期新到旧排序
 
     daily_html = build_daily_html(
         news_html_fragment=news_html_fragment,
         generated_time_text=generated_time_text,
         source_web_url=source_web_url,
         current_year_text=source_year_text,
-        archive_dates=archive_index_map[source_year_text],
+        current_month_text=source_month_text,
+        archive_dates=archive_index_map[source_year_text][source_month_text],
     )  # 生成单日页面 HTML
     daily_html_path.write_text(daily_html, encoding="utf-8")  # 写入单日页面文件
 
