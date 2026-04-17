@@ -43,93 +43,16 @@
 <body>
   <main>
     <h1>BuilderPulse 每日新闻整理</h1>
-    <p class="meta">生成时间（Asia/Shanghai）: 2026-04-17 15:44:15</p>
-    直接输出HTML片段，不需要任何解释。需要包含标题、日期、要点列表（3-8条）、结论。内容从输入中提取：标题可能是"BuilderPulse 2026年4月17日"或者使用输入中的今日头条。输入中"今日: Claude Opus 4.7 发布同日 Qwen3.6 开源性能反超、Hermes Agent 七天 51K Stars 引爆 Agent 框架竞争、谷歌向 ICE 交出学生数据与 Fiverr 隐私泄露双重事故"作为三个要点。另外还有一条"如果你有2小时..."的建议，也可以作为要点或结论？结构要求：标题、日期、3-8条要点列表、1段结论。所以我们可以把三个新闻事件作为要点，再加一个"如果你有2小时..."作为第四个要点？或者把那个作为结论前的额外提示？最好严格：要点列表3-8条，结论单独一段。结论可以从输入中"最近7天"的总结或者从"KeyFuse护栏还没人做"等提取。更合理：结论可以是对开发者的小建议或者总结。输入最后有一个"最近7天"列表，但那是其他日期的链接。我们基于今日内容给出结论：强调密钥安全的重要性，或者鼓励做浏览器扩展。按照BuilderPulse风格，结论可以是一句总结性的话。
-
-为了符合"仅输出HTML片段"，直接输出section。
-
-要点：
-1. Claude Opus 4.7发布同日，Qwen3.6开源实现性能反超。
-2. Hermes Agent七天收获51K Stars，引爆Agent框架竞争。
-3. 谷歌向ICE交出学生数据，Fiverr发生隐私泄露双重事故。
-4. 创意建议：开发一个对AI API密钥强制执行按项目支出上限并检测失控密钥的浏览器扩展。
-
-四个要点。也可以把第四个作为结论中的行动建议？但结论是一段。可以要点四个，结论一段呼吁关注API密钥安全或做这个扩展。
-
-另外注意日期：2026年4月17日。标题：BuilderPulse 或 技术新闻摘要。使用"BuilderPulse"作为标题。
-
-所以输出HTML结构：<section>内包含<h2>标题</h2>，<p class="date">日期</p>，<ul><li>...</li></ul>，<p class="conclusion">...</p>。
-
-使用内联样式或简单class？为了可读，可以加一点基础样式，但不需要太复杂，因为是嵌入网页的片段。可以加style标签？最好内联style或者简单。输出干净HTML。
-
-我会输出带简单CSS的section，使其看起来整洁。不强制要求，但可以加。
-
-最后确保没有多余解释，没有markdown代码块标记。html
-<section class="builderpulse-daily">
-  <style>
-    .builderpulse-daily {
-      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      max-width: 720px;
-      margin: 0 auto;
-      background: #ffffff;
-      border-radius: 20px;
-      padding: 1.5rem;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-      border: 1px solid #eaeef2;
-    }
-    .builderpulse-daily h2 {
-      font-size: 1.6rem;
-      font-weight: 600;
-      margin: 0 0 0.25rem 0;
-      color: #0f172a;
-      letter-spacing: -0.01em;
-    }
-    .builderpulse-daily .date {
-      font-size: 0.875rem;
-      color: #5b6e8c;
-      border-bottom: 1px solid #eef2f6;
-      padding-bottom: 0.75rem;
-      margin-bottom: 1rem;
-    }
-    .builderpulse-daily ul {
-      margin: 1rem 0;
-      padding-left: 1.25rem;
-    }
-    .builderpulse-daily li {
-      margin: 0.75rem 0;
-      line-height: 1.45;
-      color: #1e293b;
-    }
-    .builderpulse-daily li strong {
-      color: #0f172a;
-      font-weight: 600;
-    }
-    .builderpulse-daily .conclusion {
-      background: #f8fafc;
-      padding: 0.875rem 1rem;
-      border-radius: 16px;
-      font-size: 0.9rem;
-      color: #0c4a6e;
-      border-left: 3px solid #3b82f6;
-      margin-top: 1.25rem;
-    }
-  </style>
-
-  <h2>📡 BuilderPulse · 技术速览</h2>
-  <div class="date">2026 年 4 月 17 日</div>
-
+    <p class="meta">生成时间（Asia/Shanghai）: 2026-04-17 15:50:42</p>
+    要求输出HTML片段，只包含一个<section>，包含标题、日期、3-8条要点列表、1段结论。内容基于用户提供的新闻：今日头条：Claude Opus 4.7发布同日Qwen3.6开源性能反超、Hermes Agent七天51K Stars引爆Agent框架竞争、谷歌向ICE交出学生数据与Fiverr隐私泄露双重事故。还有下面一个"如果你有2小时"的idea。以及最近7天的列表（但要点列表应该聚焦今日主要新闻，可以提取3条要点：模型发布竞争、Agent框架、隐私事故。结论可以总结趋势或提醒。注意不要输出多余解释，仅HTML。需要可读简洁，无markdown。日期是2026年4月17日。标题可以是BuilderPulse或其他？用户要求"BuilderPulse当日新闻"，可以写"BuilderPulse"作为标题。输出HTML片段，不要body等。>
+  <h2>BuilderPulse · 2026年4月17日</h2>
   <ul>
-    <li><strong>Claude Opus 4.7 发布同日，Qwen3.6 开源性能反超</strong> — 开源模型在多项基准上超越最新闭源旗舰，竞赛进入白热化。</li>
-    <li><strong>Hermes Agent 七天斩获 51K Stars</strong> — Agent 框架赛道被彻底引爆，开发者生态迎来新焦点。</li>
-    <li><strong>谷歌向 ICE 交出学生数据 &amp; Fiverr 隐私泄露</strong> — 双重数据安全事件警示：隐私合规与密钥管控刻不容缓。</li>
-    <li><strong>💡 2 小时可做的安全工具</strong> — 开发浏览器扩展，为 AI API 密钥强制执行项目支出上限并检测失控密钥。</li>
+    <li><strong>模型对决：</strong> Claude Opus 4.7 发布当天，Qwen3.6 开源并实现性能反超，开源与闭源竞争再升级。</li>
+    <li><strong>Agent 框架爆发：</strong> Hermes Agent 上线 7 天狂揽 51K stars，引爆 Agent 框架新一波竞争热潮。</li>
+    <li><strong>双重隐私事故：</strong> 谷歌向 ICE 移交学生数据，同时 Fiverr 发生数据泄露，用户隐私保护拉响警报。</li>
   </ul>
-
-  <div class="conclusion">
-    🎯 结论：模型发布与框架热度背后，API 密钥失控正成为真实财务黑洞。立即行动 —— 从“KeyFuse”式护栏到轻量级浏览器扩展，等待填补的实用工具缺口就是你的机会。
-  </div>
+  <p><strong>结论：</strong> 模型能力与 Agent 工具飞速迭代，但隐私与密钥管控漏洞频出——<strong>若你有 2 小时，不妨开发一个按项目设支出上限、检测失控密钥的浏览器扩展</strong>，填补 KeyFuse 护栏的市场空白。</p>
 </section>
-```
     <hr />
     <p class="meta">
       数据源:
