@@ -1,7 +1,7 @@
 """
 文件路径: c:/Users/Administrator/Desktop/github新闻/builderpulse-news-site/generate_builderpulse_news.py
 创建时间: 2026-04-17 15:27
-上次修改时间: 2026-04-17 15:27
+上次修改时间: 2026-04-17 16:10
 开发者: aidaox
 """
 
@@ -13,16 +13,20 @@ import os  # 操作系统环境变量模块
 import re  # 正则表达式模块
 import subprocess  # 执行 git 命令模块
 import sys  # 系统退出模块
+from html import escape  # HTML 转义模块
 from pathlib import Path  # 路径处理模块
 
 import requests  # HTTP 请求模块
 
 
 README_RAW_URL = "https://raw.githubusercontent.com/BuilderPulse/BuilderPulse/main/README.md"  # BuilderPulse 仓库 README 原始地址
+DAILY_FILE_RAW_BASE = "https://raw.githubusercontent.com/BuilderPulse/BuilderPulse/main"  # BuilderPulse 每日文件 RAW 基础地址
+DAILY_FILE_WEB_BASE = "https://github.com/BuilderPulse/BuilderPulse/blob/main"  # BuilderPulse 每日文件网页基础地址
 DEFAULT_API_BASE = "https://token.n13.club/v1/chat/completions"  # 兼容 OpenAI 的聊天接口地址
 DEFAULT_MODEL = "deepseek-reasoner-search"  # 默认调用的模型名称
 DEFAULT_TARGET_REPO = "taofuli8/builderpulse-news-site"  # 默认推送的目标仓库
-DEFAULT_OUTPUT_FILE = "index.html"  # 默认生成的 HTML 文件名
+DEFAULT_SITE_URL = "https://taofuli8.github.io/builderpulse-news-site/"  # 默认站点访问地址
+DEFAULT_SOURCE_LANG = "zn"  # 默认抓取语言目录（zn 会自动映射为 zh）
 
 
 def fetch_builderpulse_readme(readme_url: str) -> str:
@@ -30,6 +34,26 @@ def fetch_builderpulse_readme(readme_url: str) -> str:
     readme_response = requests.get(readme_url, timeout=60)  # 请求 README 文本
     readme_response.raise_for_status()  # 状态码非 200 时抛错
     return readme_response.text  # 返回 README 内容字符串
+
+
+def fetch_daily_markdown_file(source_lang: str, date_text: str) -> str:
+    """优先按日期抓取 BuilderPulse 当天明细 Markdown。"""
+    lang_alias_map = {"zn": "zh", "cn": "zh"}  # 用户习惯写法到仓库目录的映射表
+    normalized_lang = lang_alias_map.get(source_lang.lower(), source_lang.lower())  # 标准化语言目录
+    year_text = date_text[:4]  # 从日期提取年份目录
+    daily_raw_url = f"{DAILY_FILE_RAW_BASE}/{normalized_lang}/{year_text}/{date_text}.md"  # 拼接当天文件地址
+    daily_response = requests.get(daily_raw_url, timeout=60)  # 请求当天明细文件
+    daily_response.raise_for_status()  # 非 200 状态码抛错
+    return daily_response.text  # 返回当天完整 markdown 正文
+
+
+def build_source_web_url(source_lang: str, date_text: str) -> str:
+    """拼接当天源文件的 GitHub 网页地址。"""
+    lang_alias_map = {"zn": "zh", "cn": "zh"}  # 用户习惯写法到仓库目录的映射表
+    normalized_lang = lang_alias_map.get(source_lang.lower(), source_lang.lower())  # 标准化语言目录
+    year_text = date_text[:4]  # 从日期提取年份目录
+    source_web_url = f"{DAILY_FILE_WEB_BASE}/{normalized_lang}/{year_text}/{date_text}.md"  # 构造 GitHub 网页 URL
+    return source_web_url  # 返回源文件网页地址
 
 
 def extract_latest_daily_block(readme_text: str) -> str:
@@ -88,14 +112,44 @@ def call_deepseek_model(
     return html_fragment  # 返回模型整理后的 HTML 片段
 
 
-def build_full_html(news_html_fragment: str, generated_time_text: str) -> str:
-    """拼装完整静态 HTML 页面内容。"""
-    full_html = f"""<!doctype html>
+def build_archive_index_map(repo_dir: Path) -> dict[str, list[str]]:
+    """扫描仓库中的历史 HTML 文件，生成按年份分组的日期列表。"""
+    archive_map: dict[str, list[str]] = {}  # 年份 -> 日期列表 的映射
+    daily_file_pattern = re.compile(r"^(?P<year>\d{4})/(?P<date>\d{4}-\d{2}-\d{2})\.html$")  # 识别 yyyy/yyyy-mm-dd.html
+    for html_path in repo_dir.rglob("*.html"):  # 遍历仓库所有 html 文件
+        relative_path_text = html_path.relative_to(repo_dir).as_posix()  # 转成相对路径字符串
+        matched = daily_file_pattern.match(relative_path_text)  # 判断是否日报文件
+        if matched is None:  # 非日报文件直接跳过
+            continue
+        year_text = matched.group("year")  # 提取年份目录
+        date_text = matched.group("date")  # 提取日期文件名
+        archive_map.setdefault(year_text, []).append(date_text)  # 累加入对应年份列表
+
+    for year_text in archive_map:  # 对每年日期按新到旧排序
+        archive_map[year_text] = sorted(archive_map[year_text], reverse=True)
+    return archive_map  # 返回整理后的归档映射
+
+
+def build_daily_html(
+    news_html_fragment: str,
+    generated_time_text: str,
+    source_web_url: str,
+    current_year_text: str,
+    archive_dates: list[str],
+) -> str:
+    """拼装单日页面 HTML（含历史切换导航）。"""
+    history_links_html = "\n".join(
+        [
+            f'<li><a href="{escape(date_text)}.html">{escape(date_text)}</a></li>'
+            for date_text in archive_dates
+        ]
+    )  # 历史日期链接列表 HTML
+    daily_html = f"""<!doctype html>
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>BuilderPulse 每日新闻整理</title>
+  <title>BuilderPulse 中文日报整理</title>
   <style>
     body {{
       margin: 0;
@@ -106,12 +160,15 @@ def build_full_html(news_html_fragment: str, generated_time_text: str) -> str:
       line-height: 1.7;
     }}
     main {{
-      max-width: 860px;
+      max-width: 1080px;
       margin: 0 auto;
       background: #ffffff;
       padding: 24px;
       border-radius: 12px;
       box-shadow: 0 8px 28px rgba(0, 0, 0, 0.06);
+      display: grid;
+      grid-template-columns: 1fr 260px;
+      gap: 24px;
     }}
     h1 {{
       margin-top: 0;
@@ -130,32 +187,122 @@ def build_full_html(news_html_fragment: str, generated_time_text: str) -> str:
     a:hover {{
       text-decoration: underline;
     }}
+    .panel {{
+      position: sticky;
+      top: 16px;
+      align-self: start;
+      border-left: 1px solid #e5e7eb;
+      padding-left: 16px;
+    }}
+    .panel ul {{
+      margin: 0;
+      padding-left: 18px;
+    }}
+    .panel li {{
+      margin: 4px 0;
+    }}
   </style>
 </head>
 <body>
   <main>
-    <h1>BuilderPulse 每日新闻整理</h1>
-    <p class="meta">生成时间（Asia/Shanghai）: {generated_time_text}</p>
-    {news_html_fragment}
-    <hr />
-    <p class="meta">
-      数据源:
-      <a href="https://github.com/BuilderPulse/BuilderPulse/" target="_blank" rel="noreferrer">
-        BuilderPulse/BuilderPulse
-      </a>
-    </p>
+    <section>
+      <h1>BuilderPulse 中文日报整理</h1>
+      <p class="meta">生成时间（Asia/Shanghai）: {generated_time_text}</p>
+      {news_html_fragment}
+      <hr />
+      <p class="meta">
+        原始来源:
+        <a href="{escape(source_web_url)}" target="_blank" rel="noreferrer">
+          当天原文
+        </a>
+      </p>
+    </section>
+    <aside class="panel">
+      <h3>{escape(current_year_text)} 历史日报</h3>
+      <ul>
+        {history_links_html}
+      </ul>
+      <p class="meta"><a href="../index.html">返回首页归档</a></p>
+    </aside>
   </main>
 </body>
 </html>
 """
-    return full_html  # 返回完整 HTML 文本
+    return daily_html  # 返回单日 HTML 文本
+
+
+def build_root_index_html(archive_index_map: dict[str, list[str]]) -> str:
+    """生成根目录首页归档 HTML。"""
+    year_sections_html_list: list[str] = []  # 每个年份区块 HTML 列表
+    for year_text in sorted(archive_index_map.keys(), reverse=True):  # 从新到旧遍历年份
+        date_links_html = "\n".join(
+            [
+                f'<li><a href="{escape(year_text)}/{escape(date_text)}.html">{escape(date_text)}</a></li>'
+                for date_text in archive_index_map[year_text]
+            ]
+        )  # 年份内日报链接列表
+        year_sections_html_list.append(
+            f"<section><h2>{escape(year_text)}</h2><ul>{date_links_html}</ul></section>"
+        )  # 追加年份区块
+
+    merged_year_sections_html = "\n".join(year_sections_html_list)  # 合并所有年份区块
+    index_html = f"""<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BuilderPulse 中文日报归档</title>
+  <style>
+    body {{
+      margin: 0;
+      padding: 24px;
+      background: #f7f7fb;
+      color: #111827;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+      line-height: 1.7;
+    }}
+    main {{
+      max-width: 920px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.06);
+    }}
+    h1 {{ margin-top: 0; }}
+    ul {{ margin-top: 8px; }}
+    a {{ color: #2563eb; text-decoration: none; }}
+    a:hover {{ text-decoration: underline; }}
+  </style>
+</head>
+<body>
+  <main>
+    <h1>BuilderPulse 中文日报归档</h1>
+    <p>按年份查看每日整理内容：</p>
+    {merged_year_sections_html}
+  </main>
+</body>
+</html>
+"""
+    return index_html  # 返回首页归档 HTML
 
 
 def run_command(command_args: list[str], working_dir: Path) -> str:
     """执行 shell 命令并在失败时抛错。"""
+    command_env = os.environ.copy()  # 复制当前环境变量用于子进程
+    if command_env.get("GIT_AUTHOR_NAME") is None:  # 未设置作者名时使用默认值
+        command_env["GIT_AUTHOR_NAME"] = command_env.get("GIT_USER_NAME", "aidaox")
+    if command_env.get("GIT_COMMITTER_NAME") is None:  # 未设置提交者名时使用默认值
+        command_env["GIT_COMMITTER_NAME"] = command_env.get("GIT_USER_NAME", "aidaox")
+    if command_env.get("GIT_AUTHOR_EMAIL") is None:  # 未设置作者邮箱时使用默认值
+        command_env["GIT_AUTHOR_EMAIL"] = command_env.get("GIT_USER_EMAIL", "aidaox@example.com")
+    if command_env.get("GIT_COMMITTER_EMAIL") is None:  # 未设置提交者邮箱时使用默认值
+        command_env["GIT_COMMITTER_EMAIL"] = command_env.get("GIT_USER_EMAIL", "aidaox@example.com")
+
     completed_process = subprocess.run(
         command_args,
         cwd=str(working_dir),
+        env=command_env,
         capture_output=True,
         text=True,
         check=False,
@@ -171,13 +318,13 @@ def run_command(command_args: list[str], working_dir: Path) -> str:
 
 def git_commit_and_push(
     repo_dir: Path,
-    output_file_name: str,
+    output_file_paths: list[str],
     target_repo_full_name: str,
     github_token_value: str,
     commit_message: str,
 ) -> None:
     """提交并推送 HTML 文件到目标仓库。"""
-    run_command(["git", "add", output_file_name], repo_dir)  # 暂存输出文件
+    run_command(["git", "add", *output_file_paths], repo_dir)  # 暂存输出文件列表
     status_output = run_command(["git", "status", "--porcelain"], repo_dir)  # 检查是否有变更
     if not status_output:  # 没有变更时直接返回，不创建空提交
         print("内容无变化，跳过 commit/push。")
@@ -189,6 +336,36 @@ def git_commit_and_push(
     print("已成功推送到远端仓库。")
 
 
+def push_wechat_notification(wechat_push_url: str, site_url: str, generated_time_text: str) -> None:
+    """推送更新通知到微信（通过第三方微信推送URL）。"""
+    if not wechat_push_url:  # 未配置微信推送地址时直接跳过
+        print("未配置 WECHAT_PUSH_URL，跳过微信推送。")
+        return
+
+    notify_title = "BuilderPulse 每日新闻已更新"  # 微信通知标题
+    notify_body = (
+        f"更新时间: {generated_time_text}\n"
+        f"访问地址: {site_url}\n"
+        "说明: 该消息由定时任务自动发送。"
+    )  # 微信通知正文
+
+    if "sctapi.ftqq.com" in wechat_push_url:  # 兼容 Server酱接口格式
+        response = requests.post(
+            wechat_push_url,
+            data={"title": notify_title, "desp": notify_body},
+            timeout=30,
+        )  # 发送Server酱表单请求
+    else:  # 兼容通用 webhook json 格式
+        response = requests.post(
+            wechat_push_url,
+            json={"title": notify_title, "content": notify_body, "url": site_url},
+            timeout=30,
+        )  # 发送Webhook JSON请求
+
+    response.raise_for_status()  # 请求失败时抛错
+    print("微信推送已发送。")
+
+
 def main() -> None:
     """主流程：抓取 -> 模型整理 -> 生成HTML -> Git推送。"""
     api_key_value = os.getenv("N13_API_KEY", "").strip()  # 模型 API Key 环境变量
@@ -196,18 +373,29 @@ def main() -> None:
     api_base_url = os.getenv("N13_API_BASE", DEFAULT_API_BASE).strip()  # 模型 API 地址
     model_name = os.getenv("MODEL_NAME", DEFAULT_MODEL).strip()  # 模型名称
     target_repo_full_name = os.getenv("TARGET_REPO", DEFAULT_TARGET_REPO).strip()  # 目标仓库全名
-    output_file_name = os.getenv("OUTPUT_FILE", DEFAULT_OUTPUT_FILE).strip()  # 输出 HTML 文件名
+    site_url = os.getenv("SITE_URL", DEFAULT_SITE_URL).strip()  # 页面访问地址
+    wechat_push_url = os.getenv("WECHAT_PUSH_URL", "").strip()  # 微信推送URL
+    source_lang = os.getenv("SOURCE_LANG", DEFAULT_SOURCE_LANG).strip() or DEFAULT_SOURCE_LANG  # 新闻源语言目录
 
-    if not api_key_value:  # API Key 缺失时终止
+    if (not api_key_value) or ("请填写" in api_key_value):  # API Key 缺失或还是模板值时终止
         raise EnvironmentError("缺少 N13_API_KEY 环境变量。")
-    if not github_token_value:  # GitHub Token 缺失时终止
+    if (not github_token_value) or ("请填写" in github_token_value):  # GitHub Token 缺失或还是模板值时终止
         raise EnvironmentError("缺少 GITHUB_TOKEN 环境变量。")
 
     working_dir = Path(__file__).resolve().parent  # 当前脚本所在目录
-    output_file_path = working_dir / output_file_name  # 输出文件完整路径
+    now_time = dt.datetime.now(dt.timezone(dt.timedelta(hours=8)))  # 生成东八区时间
+    source_date_text = now_time.strftime("%Y-%m-%d")  # 生成当天日期文本
+    source_year_text = source_date_text[:4]  # 生成当天年份目录文本
+    try:
+        latest_news_markdown = fetch_daily_markdown_file(
+            source_lang=source_lang,
+            date_text=source_date_text,
+        )  # 优先抓取当天明细文件
+        print(f"已使用当天明细文件: {source_lang}/{source_year_text}/{source_date_text}.md")
+    except Exception:  # 当天文件不存在时按用户要求提示“没有更新”
+        print("今日暂无更新。")
+        return
 
-    readme_text = fetch_builderpulse_readme(README_RAW_URL)  # 下载源 README
-    latest_news_markdown = extract_latest_daily_block(readme_text)  # 提取当日新闻块
     news_html_fragment = call_deepseek_model(
         api_base_url=api_base_url,
         api_key_value=api_key_value,
@@ -215,20 +403,45 @@ def main() -> None:
         source_markdown=latest_news_markdown,
     )  # 模型整理
 
-    now_time = dt.datetime.now(dt.timezone(dt.timedelta(hours=8)))  # 生成东八区时间
     generated_time_text = now_time.strftime("%Y-%m-%d %H:%M:%S")  # 格式化时间字符串
-    full_html = build_full_html(news_html_fragment, generated_time_text)  # 拼装完整HTML
-    output_file_path.write_text(full_html, encoding="utf-8")  # 写入 HTML 文件
-    print(f"HTML 已生成: {output_file_path}")
+    source_web_url = build_source_web_url(source_lang=source_lang, date_text=source_date_text)  # 构造源文件网页地址
+    year_dir_path = working_dir / source_year_text  # 年份目录路径
+    year_dir_path.mkdir(parents=True, exist_ok=True)  # 若年份目录不存在则创建
+    daily_html_path = year_dir_path / f"{source_date_text}.html"  # 当天页面输出路径
+
+    archive_index_map = build_archive_index_map(working_dir)  # 扫描已有历史归档
+    archive_index_map.setdefault(source_year_text, [])  # 确保当前年份存在
+    if source_date_text not in archive_index_map[source_year_text]:  # 确保当日日期存在
+        archive_index_map[source_year_text].append(source_date_text)
+    archive_index_map[source_year_text] = sorted(archive_index_map[source_year_text], reverse=True)  # 日期新到旧排序
+
+    daily_html = build_daily_html(
+        news_html_fragment=news_html_fragment,
+        generated_time_text=generated_time_text,
+        source_web_url=source_web_url,
+        current_year_text=source_year_text,
+        archive_dates=archive_index_map[source_year_text],
+    )  # 生成单日页面 HTML
+    daily_html_path.write_text(daily_html, encoding="utf-8")  # 写入单日页面文件
+
+    root_index_html = build_root_index_html(archive_index_map=archive_index_map)  # 生成首页归档 HTML
+    root_index_path = working_dir / "index.html"  # 首页文件路径
+    root_index_path.write_text(root_index_html, encoding="utf-8")  # 写入首页归档文件
+    print(f"HTML 已生成: {daily_html_path}")
 
     commit_message = f"chore: update BuilderPulse daily news ({now_time.strftime('%Y-%m-%d')})"  # 提交信息
     git_commit_and_push(
         repo_dir=working_dir,
-        output_file_name=output_file_name,
+        output_file_paths=[daily_html_path.relative_to(working_dir).as_posix(), "index.html"],
         target_repo_full_name=target_repo_full_name,
         github_token_value=github_token_value,
         commit_message=commit_message,
     )  # 提交并推送
+    push_wechat_notification(
+        wechat_push_url=wechat_push_url,
+        site_url=site_url,
+        generated_time_text=generated_time_text,
+    )  # 发送微信通知
 
 
 if __name__ == "__main__":

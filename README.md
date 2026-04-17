@@ -1,11 +1,42 @@
-# BuilderPulse 每日新闻自动站点
+# BuilderPulse 中文日报镜像站
 
-这个项目用于：
+在线访问地址：`https://taofuli8.github.io/builderpulse-news-site/`
 
-1. 抓取 [BuilderPulse/BuilderPulse](https://github.com/BuilderPulse/BuilderPulse/) 的每日最新新闻；
-2. 调用 `deepseek-reasoner-search` 整理内容；
-3. 生成 `index.html`；
-4. 自动 `git commit` + `git push` 到你的公开仓库，供 GitHub Pages 展示。
+## 项目背景
+
+原项目 [BuilderPulse/BuilderPulse](https://github.com/BuilderPulse/BuilderPulse/) 很优秀，核心价值非常明确：
+
+- 每天固定时间从 Hacker News / GitHub / Product Hunt / HuggingFace / Google Trends / Reddit 等多源聚合信息；
+- 给独立开发者输出“今天该做什么”的行动建议；
+- 提供中英文日报，且按日期持续更新。
+
+## 原始痛点（本项目为什么存在）
+
+虽然原始日报内容质量很高，但直接阅读有几个不方便点：
+
+1. 原文信息密度大，用户快速浏览成本高；
+2. 原仓库阅读体验偏文档流，不够适合“日报归档站点化浏览”；
+3. 想看历史内容时，缺少更直观的“站点内切换”体验。
+
+## 本项目做了什么
+
+这个项目做的是 **“结构不改源、阅读体验增强”**：
+
+1. 每天优先抓取当天中文明细文件（`zn` 自动映射到 `zh`，例如 `zh/2026/2026-04-17.md`）；
+2. 调用 `deepseek-reasoner-search` 对当天内容进行二次整理，生成更适合阅读的 HTML；
+3. 站点按“年份/日期”归档保存，例如：
+   - `2026/2026-04-17.html`
+   - `2026/2026-04-18.html`
+4. 每天页面内可直接切换本年度历史日报；
+5. 如果当天源文件还没更新，则只提示：`今日暂无更新。`
+
+## 页面结构说明
+
+- 根首页：`/index.html`
+  - 展示按年份分组的历史日报入口
+- 每日页：`/YYYY/YYYY-MM-DD.html`
+  - 展示当天整理后的正文
+  - 右侧展示该年份历史日期，支持快速切换
 
 ## 1) 准备环境
 
@@ -25,13 +56,21 @@ pip install -r requirements.txt
 
 ## 2) 配置环境变量
 
-复制模板：
+先复制模板：
 
 ```bash
 cp .env.example .env
 ```
 
-把 `.env` 中的 `N13_API_KEY` 和 `GITHUB_TOKEN` 改成你自己的值。
+关键变量说明：
+
+- `N13_API_KEY`：你在 `token.n13.club` 的模型访问 key
+- `GITHUB_TOKEN`：有仓库写权限的 fine-grained token
+- `N13_API_BASE`：默认 `https://token.n13.club/v1/chat/completions`
+- `MODEL_NAME`：默认 `deepseek-reasoner-search`
+- `TARGET_REPO`：默认 `taofuli8/builderpulse-news-site`
+- `SITE_URL`：默认 `https://taofuli8.github.io/builderpulse-news-site/`
+- `SOURCE_LANG`：默认 `zn`（脚本内部自动映射到 `zh` 目录）
 
 ## 3) 首次运行
 
@@ -51,16 +90,21 @@ export GITHUB_TOKEN="你的GitHubToken"
 python3 ./generate_builderpulse_news.py
 ```
 
-## 4) PVE 定时任务（每天 11:05）
+## 4) 定时执行建议
 
-建议比源站更新时间（11:00）晚 5 分钟执行，避免抓到旧内容。
+你当前已切到 OpenClaw 定时任务，不再推荐系统 crontab。
 
-```cron
-5 11 * * * cd /opt/builderpulse-news-site && /usr/bin/python3 generate_builderpulse_news.py >> /var/log/builderpulse-news.log 2>&1
-```
+建议保持每天 `11:05` 执行（晚于源站 11:00 更新），避免抓到旧内容。
 
-## 5) 说明
+## 5) 运行行为
 
-- `generate_builderpulse_news.py` 默认会推送到 `taofuli8/builderpulse-news-site`。
-- 你可以通过环境变量 `TARGET_REPO` 覆盖目标仓库。
-- 脚本只会提交 `index.html`，当内容无变化时不会产生新提交。
+- 每次执行会优先抓取当天中文明细文件；
+- 成功后会更新：
+  - 当天页 `YYYY/YYYY-MM-DD.html`
+  - 根首页 `index.html`
+- 然后自动 `git commit` + `git push` 到目标仓库；
+- 若当天源文件不存在，输出 `今日暂无更新。` 并结束，不会乱写内容。
+
+## 6) 致谢
+
+再次说明：本项目不是替代 [BuilderPulse/BuilderPulse](https://github.com/BuilderPulse/BuilderPulse/)，而是面向中文阅读场景做“再整理 + 归档站点化展示”。
