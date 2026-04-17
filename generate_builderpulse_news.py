@@ -8,6 +8,7 @@
 from __future__ import annotations
 
 import datetime as dt  # 当前时间处理模块
+import hashlib  # 哈希计算模块
 import json  # JSON 序列化模块
 import os  # 操作系统环境变量模块
 import re  # 正则表达式模块
@@ -27,6 +28,7 @@ DEFAULT_MODEL = "deepseek-reasoner-search"  # 默认调用的模型名称
 DEFAULT_TARGET_REPO = "taofuli8/builderpulse-news-site"  # 默认推送的目标仓库
 DEFAULT_SITE_URL = "https://taofuli8.github.io/builderpulse-news-site/"  # 默认站点访问地址
 DEFAULT_SOURCE_LANG = "zn"  # 默认抓取语言目录（zn 会自动映射为 zh）
+DEFAULT_STATE_FILE = "state/source_state.json"  # 源内容哈希状态文件路径
 
 
 def fetch_builderpulse_readme(readme_url: str) -> str:
@@ -77,10 +79,18 @@ def call_deepseek_model(
 ) -> str:
     """调用 deepseek 模型，将 Markdown 片段整理为 HTML 片段。"""
     system_prompt = (
-        "你是一个技术新闻编辑器。"
-        "请把输入的 BuilderPulse 当日新闻整理成简洁、可读、可直接嵌入网页的 HTML 片段。"
-        "要求: 仅输出 HTML 片段，不要输出 markdown 代码块，不要输出多余解释。"
-        "结构要求: 一个 <section>，包含标题、日期、3-8条要点列表、1段结论。"
+        "你是一个技术新闻主编。"
+        "请将输入的 BuilderPulse 当日新闻重写为清晰、可读、层级分明的中文日报 HTML。"
+        "你必须只输出 HTML 片段，不允许输出 markdown、代码块、解释说明。"
+        "输出结构必须严格包含: "
+        "1个<section>根节点；"
+        "1个<h2>今日核心结论；"
+        "1个<ul>（3到6条，短句要点）；"
+        "1个<h3>今日可执行动作；"
+        "1个<ol>（2到4条，具体行动）；"
+        "1个<h3>风险与观察；"
+        "1个<ul>（2到4条）。"
+        "禁止整段照抄原文；每条尽量不超过45个中文字符。"
     )  # 系统提示词
     user_prompt = f"请整理以下内容:\n\n{source_markdown}"  # 用户提示词
 
@@ -109,7 +119,36 @@ def call_deepseek_model(
     if not choices_list:  # 没有候选时抛错
         raise ValueError(f"模型返回为空: {response_json}")
     html_fragment = choices_list[0]["message"]["content"].strip()  # 提取第一条内容
+    html_fragment = re.sub(r"^```(?:html)?\s*", "", html_fragment, flags=re.IGNORECASE)  # 清理可能的代码块起始标记
+    html_fragment = re.sub(r"\s*```$", "", html_fragment)  # 清理可能的代码块结束标记
     return html_fragment  # 返回模型整理后的 HTML 片段
+
+
+def compute_text_sha256(content_text: str) -> str:
+    """计算文本内容的 SHA256 哈希。"""
+    content_hash = hashlib.sha256(content_text.encode("utf-8")).hexdigest()  # 计算 UTF-8 文本哈希
+    return content_hash  # 返回十六进制哈希字符串
+
+
+def read_state_map(state_file_path: Path) -> dict[str, str]:
+    """读取源内容状态映射（date -> hash）。"""
+    if not state_file_path.exists():  # 状态文件不存在时返回空映射
+        return {}
+    try:
+        raw_state_text = state_file_path.read_text(encoding="utf-8")  # 读取状态文件文本
+        loaded_state = json.loads(raw_state_text)  # 解析 JSON
+        if isinstance(loaded_state, dict):  # 只接受对象结构
+            return {str(k): str(v) for k, v in loaded_state.items()}  # 统一键值为字符串
+        return {}
+    except Exception:
+        return {}  # 解析失败时回退为空映射
+
+
+def write_state_map(state_file_path: Path, state_map: dict[str, str]) -> None:
+    """写入源内容状态映射（date -> hash）。"""
+    state_file_path.parent.mkdir(parents=True, exist_ok=True)  # 确保状态目录存在
+    serialized_state = json.dumps(state_map, ensure_ascii=False, indent=2)  # 序列化 JSON 文本
+    state_file_path.write_text(serialized_state + "\n", encoding="utf-8")  # 写入状态文件
 
 
 def build_archive_index_map(repo_dir: Path) -> dict[str, list[str]]:
@@ -386,6 +425,7 @@ def main() -> None:
     now_time = dt.datetime.now(dt.timezone(dt.timedelta(hours=8)))  # 生成东八区时间
     source_date_text = now_time.strftime("%Y-%m-%d")  # 生成当天日期文本
     source_year_text = source_date_text[:4]  # 生成当天年份目录文本
+    state_file_path = working_dir / DEFAULT_STATE_FILE  # 状态文件完整路径
     try:
         latest_news_markdown = fetch_daily_markdown_file(
             source_lang=source_lang,
@@ -393,6 +433,13 @@ def main() -> None:
         )  # 优先抓取当天明细文件
         print(f"已使用当天明细文件: {source_lang}/{source_year_text}/{source_date_text}.md")
     except Exception:  # 当天文件不存在时按用户要求提示“没有更新”
+        print("今日暂无更新。")
+        return
+
+    state_map = read_state_map(state_file_path=state_file_path)  # 读取历史哈希状态映射
+    source_content_hash = compute_text_sha256(latest_news_markdown)  # 计算当天源文档哈希
+    previous_hash = state_map.get(source_date_text, "")  # 读取当天上次哈希值
+    if previous_hash == source_content_hash:  # 若源内容未变化则短路退出
         print("今日暂无更新。")
         return
 
@@ -429,10 +476,13 @@ def main() -> None:
     root_index_path.write_text(root_index_html, encoding="utf-8")  # 写入首页归档文件
     print(f"HTML 已生成: {daily_html_path}")
 
+    state_map[source_date_text] = source_content_hash  # 更新当天哈希值
+    write_state_map(state_file_path=state_file_path, state_map=state_map)  # 写入状态文件
+
     commit_message = f"chore: update BuilderPulse daily news ({now_time.strftime('%Y-%m-%d')})"  # 提交信息
     git_commit_and_push(
         repo_dir=working_dir,
-        output_file_paths=[daily_html_path.relative_to(working_dir).as_posix(), "index.html"],
+        output_file_paths=[daily_html_path.relative_to(working_dir).as_posix(), "index.html", DEFAULT_STATE_FILE],
         target_repo_full_name=target_repo_full_name,
         github_token_value=github_token_value,
         commit_message=commit_message,
