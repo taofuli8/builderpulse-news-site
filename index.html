@@ -43,68 +43,28 @@
 <body>
   <main>
     <h1>BuilderPulse 每日新闻整理</h1>
-    <p class="meta">生成时间（Asia/Shanghai）: 2026-04-17 15:52:47</p>
-    直接输出HTML片段。需要包含标题、日期、3-8条要点列表、1段结论。根据输入内容，今日新闻有三个要点：Claude Opus 4.7发布同日Qwen3.6开源性能反超、Hermes Agent七天51K Stars、谷歌和Fiverr数据隐私事故。另外有个“如果你有2小时”的建议，可以作为结论前的亮点或者放在结论里？要求有结论段落。可以写一个结论总结趋势或建议。还有“最近7天”列表，但那是额外的，主要根据“今日”内容整理。我们提取今日核心3条新闻作为要点，然后结论可以围绕密钥失控和护栏机会，呼应那个2小时建议。输出简洁HTML，使用section，类名可自定义。注意不要markdown代码块，直接输出HTML。html
-<section class="builderpulse-daily">
-  <h2>BuilderPulse · 技术晨报</h2>
-  <p class="date">📅 2026 年 4 月 17 日</p>
-  <ul class="highlights">
-    <li>🔁 <strong>Claude Opus 4.7 发布同日，Qwen3.6 开源并实现性能反超</strong> —— 开源与闭源模型竞争进入白热化。</li>
-    <li>🤖 <strong>Hermes Agent 开源 7 天揽获 51K Stars</strong> —— Agent 框架赛道迎来现象级新玩家。</li>
-    <li>⚠️ <strong>双重数据事故</strong>：谷歌向 ICE 交出学生数据 + Fiverr 发生隐私泄露，引发广泛担忧。</li>
-  </ul>
-  <div class="insight">
-    <p>💡 <strong>结论</strong>：模型发布与 Agent 框架争霸同步提速，但安全护栏严重滞后。<br>
-    趁周末 2 小时，做一个对 AI API 密钥强制执行按项目支出上限、能检测失控密钥的浏览器扩展 —— 这可能是近期回报率最高的小工具。</p>
-  </div>
-</section>
+    <p class="meta">生成时间（Asia/Shanghai）: 2026-04-17 15:56:13</p>
+    被要求将输入的BuilderPulse Daily新闻整理成HTML片段。需要包含一个<section>，包含标题、日期、3-8条要点列表、1段结论。内容来自输入文本，非常长。需要提取关键新闻要点（今日top 3或其他重要新闻）作为要点列表，然后写一段结论。注意保持简洁、可读。直接输出HTML片段，无markdown代码块，无多余解释。
 
-<style>
-  .builderpulse-daily {
-    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-    max-width: 720px;
-    margin: 1rem auto;
-    padding: 1.5rem;
-    background: #fafaf9;
-    border-radius: 24px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    border: 1px solid #e7e5e4;
-  }
-  .builderpulse-daily h2 {
-    margin: 0 0 0.25rem 0;
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: #1c1917;
-  }
-  .builderpulse-daily .date {
-    margin: 0 0 1rem 0;
-    font-size: 0.9rem;
-    color: #78716c;
-    border-left: 3px solid #f59e0b;
-    padding-left: 0.75rem;
-  }
-  .builderpulse-daily ul {
-    margin: 0 0 1.25rem 0;
-    padding-left: 1.25rem;
-  }
-  .builderpulse-daily li {
-    margin: 0.5rem 0;
-    line-height: 1.4;
-    color: #2d2a26;
-  }
-  .builderpulse-daily .insight {
-    background: #fff7ed;
-    padding: 0.75rem 1rem;
-    border-radius: 16px;
-    border-left: 4px solid #f59e0b;
-    font-size: 0.95rem;
-    color: #2d2a26;
-  }
-  .builderpulse-daily .insight p {
-    margin: 0;
-  }
-</style>
-```
+标题可以用"BuilderPulse Daily"或者根据内容自拟。日期是April 17, 2026。要点列表应该包含今天最重要的3-8条新闻。从输入中提取：Top 3部分已经有明确的三个要点。另外还可以加入Discovery中的一些发现，但不要太多。选择最核心的3-8条即可。结论段总结趋势或给出行动建议。
+
+我将这样组织：标题"BuilderPulse Daily — April 17, 2026"，日期可以用<time>。要点列表包含：1. Anthropic Opus 4.7 vs Alibaba Qwen3.6；2. Hermes Agent突破；3. 两起隐私泄露事件；4. 开发者抱怨Opus 4.7的安全限制和计费问题；5. Cal.com闭源及开源争论；6. 本地模型趋势。但最好控制在3-8条，6条合理。结论：强调本地模型崛起、代理工具市场分裂、以及开发者对成本和隐私的关注。
+
+注意：不要输出任何解释或markdown。直接输出HTML。 class="builderpulse-daily">
+  <h2>BuilderPulse Daily</h2>
+  <time datetime="2026-04-17">April 17, 2026</time>
+  
+  <ul>
+    <li><strong>Anthropic ships Opus 4.7</strong> with adaptive thinking and a tokenizer expansion (1.0–1.35× more tokens). Same day, Alibaba open-sources <strong>Qwen3.6-35B-A3B</strong> (3B active MoE) – Simon Willison declares it draws a better pelican on his laptop than Opus 4.7.</li>
+    <li><strong>“Hermes Agent” breakout</strong>: NousResearch/hermes-agent hits 51K GitHub stars in 7 days; “hermes agent github” search surges +140%. The agent harness market gets a powerful new entrant.</li>
+    <li><strong>Two privacy meltdowns</strong>: Google hands student protester’s account data to ICE; Fiverr leaves customer tax returns and NDAs indexable on Google Search. Privacy-first tooling gets an expensive demo.</li>
+    <li><strong>Opus 4.7 backlash</strong>: Developers report the model refuses legitimate security work due to new cyber safeguards, and the tokenizer change acts as a silent price hike. Firebase user sees €54K billing spike from an unrestricted Gemini key.</li>
+    <li><strong>Cal.com goes closed source</strong>, citing AI copycat pressure – sparks rebuttal “Open Source Isn’t Dead.” Meanwhile, <strong>local-first stack</strong> (Qwen3.6 + Gemma 4 + VoxCPM2) becomes viable on a 48GB Mac, and Darkbloom enables private inference on idle Macs.</li>
+    <li><strong>Trend vocabulary shift</strong>: “Agent,” “harness,” “skills,” “memory” replace “copilot” and “pair programmer.” Self-hosted tools like OpenOffice (+250% search) and Joplin (+150%) see revival due to subscription fatigue.</li>
+  </ul>
+  
+  <p><strong>Conclusion:</strong> The frontier model gap is closing fast – free, local MoEs now beat flagship APIs on specific tasks. Agent harnesses and cost-control tooling are the weekend-build opportunities with immediate demand. Build guardrails before the next €54K billing disaster, and price per agent, not per seat.</p>
+</section>
     <hr />
     <p class="meta">
       数据源:
