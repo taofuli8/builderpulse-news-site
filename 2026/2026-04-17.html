@@ -61,25 +61,53 @@
   <main>
     <section>
       <h1>BuilderPulse 中文日报整理</h1>
-      <p class="meta">生成时间（Asia/Shanghai）: 2026-04-17 16:02:34</p>
-      根据要求，整理一个HTML片段，内容基于BuilderPulse Daily 2026年4月17日的新闻。需要包含：section、标题、日期、3-8条要点列表、1段结论。要点列表从今日Top 3、发现机会、技术选型等选取关键点，但要求简洁可读。结论可以总结趋势或行动。我将提取最核心的几个要点，例如Claude Opus 4.7 vs Qwen3.6、Hermes Agent爆红、隐私泄露事故、SmallDocs/Home Memory发布、Cal.com闭源、OpenOffice复活、Agent基础设施趋势等。最后结论建议关注Agent护栏/成本控制工具。输出纯HTML片段，无markdown代码块，无多余解释。html
-<section class="builderpulse-daily">
-  <h2>BuilderPulse Daily</h2>
-  <p class="date">2026年4月17日 · 上海</p>
-  <ul class="key-points">
-    <li><strong>Claude Opus 4.7 发布</strong> – 自适应思维模式 + tokenizer扩展(1.0–1.35×)，但同日开源的 Qwen3.6-35B-A3B (MoE) 在笔记本上画出的鹈鹕“更好看”，引发开发者对闭源模型定价的质疑。</li>
-    <li><strong>Hermes Agent 成黑马</strong> – 7天收获51K GitHub Stars，“hermes agent github”搜索量飙升140%，AI编程Agent框架市场竞争加剧。</li>
-    <li><strong>两起隐私泄露事故</strong> – 谷歌向ICE移交学生抗议者数据，Fiverr将客户税表/NDA暴露在谷歌搜索中。隐私优先工具获得惨痛现实演示。</li>
-    <li><strong>独立发布亮点</strong> – SmallDocs（无干扰Markdown编辑器）、Home Memory（本地线缆/管道数据库）、openwhisp（本地Wispr Flow克隆，数据不离开Mac）。</li>
-    <li><strong>老项目复活潮</strong> – OpenOffice搜索量+250%，Joplin +150%，Clojure纪录片上线，“逃离SaaS订阅”驱动用户转向自托管古老工具。</li>
-    <li><strong>Cal.com 宣布闭源</strong> – 归因于AI克隆者压力，引发“开源没死”反驳。Discourse紧急澄清不会闭源。</li>
-    <li><strong>Agent基础设施成为共识</strong> – Product Hunt前五名发布（Claude Code桌面版、Resend CLI 2.0、stagewise、Gemini CLI子Agent、Astropad Workbench）均映射HN/GitHub热门趋势。</li>
-  </ul>
-  <p class="conclusion">
-    <strong>结论：</strong>“Agent”已取代“Copilot”成为年度关键词。构建<strong>AI密钥支出上限/成本可观测性工具</strong>（如KeyFuse）是今日最高ROI的2小时项目——Firebase + Gemini刚刚上演€54k账单事故，而Opus 4.7的tokenizer变更意味每个用户都收到隐性涨价。抓住“护栏+内存+归因”这一基础设施层，比再造又一个自托管Notion更有机会。
-  </p>
+      <p class="meta">生成时间（Asia/Shanghai）: 2026-04-17 16:08:53</p>
+      被要求输出一个HTML片段，包含特定结构：一个<section>根节点，一个<h2>今日核心结论>，一个<ul>（3-6条短句要点），一个<h3>今日可执行动作>，一个<ol>（2-4条具体行动），一个<h3>风险与观察>，一个<ul>（2-4条）。每条不超过45个中文字符。不能整段照抄原文。必须只输出HTML片段，无markdown、代码块或解释。
+
+需要从输入的BuilderPulse内容中提取核心信息，重写成简洁的要点。
+
+我将先确定今日核心结论的3-6条：基于Top 3和交叉参考。
+
+1. Anthropic Opus 4.7发布但被开源Qwen3.6-35B-A3B在画鹈鹕上击败，本地模型能力逼近闭源前沿。
+2. Hermes Agent七天51K Stars，AI编程Agent框架市场爆发，新入局者压力大。
+3. 谷歌和Fiverr隐私泄露事故凸显隐私优先工具价值。
+4. 自托管与开源套利浪潮：$400/月SaaS → €10/月VPS。
+5. “Agent”取代“Copilot”成为新热词，记忆/技能/托管成为基础设施方向。
+
+提炼成每条<=45字。
+
+今日可执行动作：基于“行动触发”中的2小时构建建议和周末扩展。提炼2-4条具体行动。
+
+风险与观察：基于“风险与观察”部分，提取2-4条。
+
+注意严格避免照抄原文，用自己的话重写。
+
+我将编写HTML，确保样式简洁但无外部依赖。使用内联样式或简单class。确保每个列表项符合长度限制。
+
+输出只包含从<section>到</section>的内容，无多余内容。>
+<h2>今日核心结论</h2>
+<ul>
+<li>Opus 4.7发布当日被开源Qwen3.6画鹈鹕击败</li>
+<li>Hermes Agent七天51K星，编程Agent框架井喷</li>
+<li>谷歌/Fiverr泄密事故为隐私工具做免费广告</li>
+<li>自托管套利模板：$400/月SaaS → €10/月VPS</li>
+<li>“Agent”取代“Copilot”成新热词，记忆/技能兴起</li>
+</ul>
+<h3>今日可执行动作</h3>
+<ol>
+<li>构建API密钥支出上限扩展（KeyFuse/TokenGuard）</li>
+<li>为Hermes Agent打包托管+审计日志版本</li>
+<li>将本地MoE模型（Qwen3.6+Gemma4）打包成AI笔记本</li>
+<li>调研自托管日程/邮件迁移流（Cal.com/Gmail用户）</li>
+</ol>
+<h3>风险与观察</h3>
+<ul>
+<li>Cal.com闭源标志“AI克隆吞食开源商业模式”</li>
+<li>Opus 4.7护栏误伤渗透测试，tokenizer变相涨价</li>
+<li>自托管Notion/Discord替代品搜索热度已降温</li>
+<li>“真实营收”是$2K MRR/8个月，而非爆款帖数字</li>
+</ul>
 </section>
-```
       <hr />
       <p class="meta">
         原始来源:
