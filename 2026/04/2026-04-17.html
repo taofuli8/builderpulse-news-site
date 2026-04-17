@@ -5,118 +5,197 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>BuilderPulse 中文日报整理</title>
   <style>
+    :root {
+      --bg: #f3f5f9;
+      --card: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --line: #e5e7eb;
+      --accent: #2563eb;
+      --accent-soft: #eff6ff;
+    }
     body {
       margin: 0;
       padding: 24px;
-      background: #f7f7fb;
-      color: #111827;
+      background: var(--bg);
+      color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
-      line-height: 1.7;
+      line-height: 1.75;
     }
     main {
-      max-width: 1080px;
+      max-width: 1160px;
       margin: 0 auto;
-      background: #ffffff;
-      padding: 24px;
-      border-radius: 12px;
-      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.06);
       display: grid;
       grid-template-columns: 1fr 260px;
       gap: 24px;
     }
+    .content {
+      background: var(--card);
+      padding: 28px;
+      border-radius: 14px;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.06);
+      border: 1px solid var(--line);
+    }
     h1 {
       margin-top: 0;
-      font-size: 28px;
+      font-size: 30px;
       line-height: 1.3;
+      margin-bottom: 10px;
     }
     .meta {
-      color: #6b7280;
+      color: var(--muted);
       font-size: 14px;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
     a {
-      color: #2563eb;
+      color: var(--accent);
       text-decoration: none;
     }
     a:hover {
       text-decoration: underline;
     }
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin: 16px 0 20px;
+    }
+    .summary-item {
+      border: 1px solid var(--line);
+      background: #fcfcfd;
+      border-radius: 10px;
+      padding: 12px;
+    }
+    .summary-item .k {
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    .summary-item .v {
+      font-size: 14px;
+      color: var(--text);
+      font-weight: 600;
+    }
+    .report-content > section {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 16px;
+      background: #fff;
+    }
+    .report-content h2 {
+      font-size: 22px;
+      margin: 4px 0 12px;
+      padding-left: 10px;
+      border-left: 4px solid var(--accent);
+    }
+    .report-content h3 {
+      font-size: 18px;
+      margin: 18px 0 10px;
+      color: #1f2937;
+    }
+    .report-content p {
+      margin: 10px 0;
+      color: #1f2937;
+    }
+    .report-content ul,
+    .report-content ol {
+      margin: 8px 0 12px 20px;
+      padding: 0;
+    }
+    .report-content li {
+      margin: 6px 0;
+    }
+    .report-content blockquote {
+      margin: 12px 0;
+      padding: 10px 12px;
+      border-left: 4px solid var(--accent);
+      background: var(--accent-soft);
+      color: #1f2937;
+      border-radius: 6px;
+    }
     .panel {
       position: sticky;
       top: 16px;
       align-self: start;
-      border-left: 1px solid #e5e7eb;
-      padding-left: 16px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+      padding: 14px 14px 8px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
     }
     .panel ul {
-      margin: 0;
+      margin: 6px 0 0;
       padding-left: 18px;
+      max-height: 60vh;
+      overflow: auto;
     }
     .panel li {
       margin: 4px 0;
+    }
+    .panel h3 {
+      margin: 4px 0 8px;
+      font-size: 16px;
+    }
+    @media (max-width: 980px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+      .panel {
+        position: static;
+      }
     }
   </style>
 </head>
 <body>
   <main>
-    <section>
+    <section class="content">
       <h1>BuilderPulse 中文日报整理</h1>
-      <p class="meta">生成时间（Asia/Shanghai）: 2026-04-17 16:11:47</p>
-      被要求输出一个HTML片段，包含一个<section>根节点，一个<h2>今日核心结论，一个<ul>（3-6条短句要点），一个<h3>今日可执行动作，一个<ol>（2-4条具体行动），一个<h3>风险与观察，一个<ul>（2-4条）。每条尽量不超过45个中文字符。需要根据提供的BuilderPulse内容重写，不能整段照抄原文。
+      <p class="meta">生成时间（Asia/Shanghai）: 2026-04-17 16:13:37</p>
+      <div class="summary-grid">
+        <div class="summary-item"><div class="k">日期</div><div class="v">2026-04</div></div>
+        <div class="summary-item"><div class="k">来源</div><div class="v">BuilderPulse 当天原文</div></div>
+        <div class="summary-item"><div class="k">阅读模式</div><div class="v">结构化简报</div></div>
+      </div>
+      <article class="report-content">
+        被要求将输入的BuilderPulse Daily内容重写为清晰、可读、层级分明的中文日报HTML。只输出HTML片段，不允许markdown、代码块、解释说明。结构必须包含：1个<section>根节点；1个<h2>今日核心结论；1个<ul>（3到6条短句要点）；1个<h3>今日可执行动作；1个<ol>（2到4条具体行动）；1个<h3>风险与观察；1个<ul>（2到4条）。每条尽量不超过45个中文字符。不能整段照抄原文。
 
-需要提炼今日核心结论：总结Top3等。可执行动作：基于“行动触发”部分的具体构建建议等。风险与观察：基于“风险与观察”部分（例如隐私泄露、模型护栏问题等）。
+我们需要从长文中提取核心结论、可执行动作、风险与观察。注意内容要简洁，要点化。
 
-注意输出纯HTML，无markdown、代码块、解释。
+今日核心结论：总结Top3事件以及最重要的趋势。可执行动作：基于行动触发部分，如构建KeyFuse或类似产品，或者迁移建议。风险与观察：例如闭源趋势、账单飙升、隐私泄露等。
 
-我将组织内容如下：
+我们组织三个部分，每条短句不超过45字符。注意使用中文。
 
-<section>
+输出HTML片段。>
 <h2>今日核心结论</h2>
 <ul>
-<li>Anthropic发布Opus 4.7，但开源Qwen3.6-35B在画鹈鹕上胜出。</li>
-<li>Hermes Agent七天内收获51K Stars，AI编程Agent框架爆发。</li>
-<li>谷歌与Fiverr接连隐私泄露，隐私优先工具迎现实需求。</li>
-<li>本地优先+MoE+有主见框架成2026年Q2胜利技术栈。</li>
+<li>Anthropic Opus 4.7 发布，同日开源 Qwen3.6 画鹈鹕更优</li>
+<li>Hermes Agent 一周 5.1 万星，AI 编程框架黑马出现</li>
+<li>谷歌与 Fiverr 隐私事故，隐私工具需求暴增</li>
+<li>Cal.com 转闭源，开源商业模式遭遇 AI 克隆威胁</li>
+<li>本地 MoE + 自托管工具成逃离 SaaS 账单主流选择</li>
 </ul>
 <h3>今日可执行动作</h3>
 <ol>
-<li>花2小时构建API密钥支出上限扩展KeyFuse/TokenGuard。</li>
-<li>周末扩展为多提供商AI成本可观测性SaaS。</li>
-<li>从Show HN草稿帖验证需求：€54K账单事故读者群。</li>
+<li>构建 API 密钥支出上限工具，解决 €54K 账单漏洞</li>
+<li>将自托管排期工具打包为单二进制桌面安装器</li>
+<li>基于 Hermes Agent 封装托管版，加审计日志</li>
+<li>用本地 Qwen3.6 + VoxCPM2 做零成本 AI 笔记本</li>
 </ol>
 <h3>风险与观察</h3>
 <ul>
-<li>Opus 4.7护栏误伤合法渗透测试，开发者转向Codex。</li>
-<li>Firebase+Gemini无限制密钥导致€54K账单飙升。</li>
-<li>Cal.com因AI克隆者压力转为闭源，开源商业模式受威胁。</li>
-<li>Agent搜索词碎片化，每周新名词爆发SEO护城河短。</li>
+<li>Agent 框架命名 SEO 护城河只剩十天左右</li>
+<li>Cal.com 闭源可能引发开源许可证实验潮</li>
+<li>Opus 4.7 护栏误伤渗透测试，需要安全验证</li>
+<li>OpenOffice 搜索涨 250%，订阅疲劳正在扩散</li>
 </ul>
 </section>
-
-注意每条尽量不超过45字。需要检查字数。例如第一条约29字，第二条约31字，第三条约32字，第四条约33字。可执行动作第一条约28字，第二条约26字，第三条约26字。风险与观察第一条约32字，第二条约30字，第三条约32字，第四条约33字。符合。
-
-输出仅此片段。>
-<h2>今日核心结论</h2>
-<ul>
-<li>Anthropic发布Opus 4.7，但开源Qwen3.6-35B在画鹈鹕上胜出。</li>
-<li>Hermes Agent七天内收获51K Stars，AI编程Agent框架爆发。</li>
-<li>谷歌与Fiverr接连隐私泄露，隐私优先工具迎现实需求。</li>
-<li>本地优先+MoE+有主见框架成2026年Q2胜利技术栈。</li>
-</ul>
-<h3>今日可执行动作</h3>
-<ol>
-<li>花2小时构建API密钥支出上限扩展KeyFuse/TokenGuard。</li>
-<li>周末扩展为多提供商AI成本可观测性SaaS。</li>
-<li>从Show HN草稿帖验证需求：€54K账单事故读者群。</li>
-</ol>
-<h3>风险与观察</h3>
-<ul>
-<li>Opus 4.7护栏误伤合法渗透测试，开发者转向Codex。</li>
-<li>Firebase+Gemini无限制密钥导致€54K账单飙升。</li>
-<li>Cal.com因AI克隆者压力转为闭源，开源商业模式受威胁。</li>
-<li>Agent搜索词碎片化，每周新名词爆发SEO护城河短。</li>
-</ul>
-</section>
+      </article>
       <hr />
       <p class="meta">
         原始来源:
